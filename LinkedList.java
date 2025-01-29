@@ -214,6 +214,7 @@ public class LinkedList {
 	public void remove(int index) {
 		remove(getNode(index));
 	}
+
 	/**
 	 * Removes from this list the node pointing to the given memory block.
 	 * 
