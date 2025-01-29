@@ -76,17 +76,17 @@ public class MemorySpace {
 		// System.out.println(iterator.hasNext());
 		while (iterator.hasNext()) {
 			MemoryBlock currentMemoryBlock = iterator.next();
-			if (iterator.current.block.length > length) {
-				allocatedList.addLast(new MemoryBlock(currentMemoryBlock.baseAddress, length));
-				int baseAdress = iterator.current.block.baseAddress;
-				iterator.current.block.length -= length;
-				iterator.current.block.baseAddress += length;
-				return baseAdress;
-			} else if (iterator.current.block.length == length) {
-				int baseAdress = iterator.current.block.baseAddress;
-				allocatedList.addLast(iterator.current.block);
-				freeList.remove(iterator.current);
-				return baseAdress;
+			if (currentMemoryBlock.length >= length) {
+				MemoryBlock newAllocatedBlock = new MemoryBlock(currentMemoryBlock.baseAddress, length);
+				allocatedList.addLast(newAllocatedBlock);
+				if (currentMemoryBlock.length > length) {
+					currentMemoryBlock.length -= length;
+					currentMemoryBlock.baseAddress += length;
+				} else {
+					freeList.remove(iterator.current);
+				}
+				return newAllocatedBlock.baseAddress;
+
 			}
 		}
 		return -1;
