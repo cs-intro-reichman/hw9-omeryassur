@@ -69,24 +69,22 @@ public class MemorySpace {
 	 * @return the base address of the allocated block, or -1 if unable to allocate
 	 */
 	public int malloc(int length) {
-		if (length <= 0) {
-			return -1;
-		}
 		ListIterator iterator = freeList.iterator();
 		// System.out.println(iterator.hasNext());
 		while (iterator.hasNext()) {
 			MemoryBlock currentMemoryBlock = iterator.next();
-			if (currentMemoryBlock.length >= length) {
-				MemoryBlock newAllocatedBlock = new MemoryBlock(currentMemoryBlock.baseAddress, length);
-				allocatedList.addLast(newAllocatedBlock);
-				if (currentMemoryBlock.length > length) {
-					currentMemoryBlock.length -= length;
-					currentMemoryBlock.baseAddress += length;
-				} else {
-					freeList.remove(iterator.current);
-				}
-				return newAllocatedBlock.baseAddress;
-
+			if (currentMemoryBlock.length == length) {
+				int address = currentMemoryBlock.baseAddress;
+				allocatedList.addLast(currentMemoryBlock);
+				freeList.remove(currentMemoryBlock);
+				return address;
+			}
+			if (currentMemoryBlock.length > length) {
+				allocatedList.addLast(new MemoryBlock(currentMemoryBlock.baseAddress, length));
+				int address = currentMemoryBlock.baseAddress;
+				currentMemoryBlock.length -= length;
+				currentMemoryBlock.baseAddress += length;
+				return address;
 			}
 		}
 		return -1;
@@ -105,20 +103,13 @@ public class MemorySpace {
 			throw new IllegalArgumentException("index must be between 0 and size");
 		}
 		ListIterator iterator = allocatedList.iterator();
-		MemoryBlock blockToFree = null;
 		while (iterator.hasNext()) {
 			MemoryBlock currentBlock = iterator.next();
-			if (iterator.current.block.baseAddress == address) {
-				blockToFree = currentBlock;
-				break;
+			if (currentBlock.baseAddress == address) {
+				allocatedList.remove(currentBlock);
+				freeList.addLast(currentBlock);
 			}
 		}
-		if (blockToFree == null) {
-			return;
-		}
-		allocatedList.remove(blockToFree);
-		freeList.addLast(blockToFree);
-
 	}
 
 	/**
