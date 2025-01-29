@@ -105,7 +105,7 @@ public class LinkedList {
 			last = newNode;
 		} else {
 			Node prevNode = getNode(index - 1);
-			prevNode.next = newNode.next;
+			newNode.next = prevNode.next;
 			prevNode.next = newNode;
 		}
 		size++;
@@ -145,6 +145,9 @@ public class LinkedList {
 	 *                                  equal to size
 	 */
 	public MemoryBlock getBlock(int index) {
+		if (index < 0 || index > size) {
+			throw new IllegalArgumentException("Index must be between 0 and size.");
+		}
 		Node nodei = getNode(index);
 		return nodei.block;
 	}
@@ -209,16 +212,8 @@ public class LinkedList {
 	 *                                  equal to size
 	 */
 	public void remove(int index) {
-		Node current = first;
-		Node prev = null;
-		for (int i = 0; i < index; i++) {
-			prev = current;
-			current = current.next;
-		}
-		prev.next = current.next;
-		size--;
+		remove(getNode(index));
 	}
-
 	/**
 	 * Removes from this list the node pointing to the given memory block.
 	 * 
@@ -228,8 +223,7 @@ public class LinkedList {
 	 *                                  list
 	 */
 	public void remove(MemoryBlock block) {
-		int index = indexOf(block);
-		remove(index);
+		remove(getNode(indexOf(block)));
 	}
 
 	/**
