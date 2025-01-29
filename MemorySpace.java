@@ -1,5 +1,4 @@
 
-
 /**
  * Represents a managed memory space. The memory space manages a list of
  * allocated
@@ -73,17 +72,18 @@ public class MemorySpace {
 		ListIterator iterator = freeList.iterator();
 		// System.out.println(iterator.hasNext());
 		while (iterator.hasNext()) {
+			MemoryBlock currentMemoryBlock = iterator.next();
 			if (iterator.current.block.length > length) {
-				MemoryBlock newBlock = new MemoryBlock(iterator.current.block.baseAddress, length);
-				allocatedList.addLast(newBlock);
+				allocatedList.addLast(new MemoryBlock(currentMemoryBlock.baseAddress, length));
 				int baseAdress = iterator.current.block.baseAddress;
 				iterator.current.block.length -= length;
 				iterator.current.block.baseAddress += length;
 				return baseAdress;
 			} else if (iterator.current.block.length == length) {
+				int baseAdress = iterator.current.block.baseAddress;
 				allocatedList.addLast(iterator.current.block);
 				freeList.remove(iterator.current);
-				return iterator.current.block.baseAddress;
+				return baseAdress;
 			}
 		}
 		return -1;
@@ -98,6 +98,9 @@ public class MemorySpace {
 	 *                    the starting address of the block to freeList
 	 */
 	public void free(int address) {
+		if (allocatedList.getSize() == 0) {
+			throw new IllegalArgumentException("index must be between 0 and size");
+		}
 		ListIterator iterator = allocatedList.iterator();
 		while (iterator.hasNext()) {
 			if (iterator.current.block.baseAddress == address) {
@@ -124,21 +127,21 @@ public class MemorySpace {
 	 */
 	public void defrag() {
 		ListIterator mainIterator = freeList.iterator();
-		ListIterator iterator = freeList.iterator();
+		ListIterator secondIterator = freeList.iterator();
 		while (mainIterator.hasNext()) {
-			int newBaseAdress = mainIterator.current.block.baseAddress + mainIterator.current.block.length;
-			while (iterator.hasNext()) {
-				if(iterator.current.block.baseAddress== newBaseAdress){
-					int newLength = iterator.current.block.length + mainIterator.current.block.length ;
-					MemoryBlock newBlock = new MemoryBlock(mainIterator.current.block.baseAddress, newLength);
-					freeList.addLast(newBlock);
-					freeList.remove(iterator.current);
-					freeList.remove(mainIterator.current);
+			MemoryBlock currBlock = mainIterator.next();
+			while (secondIterator.hasNext()) {
+				MemoryBlock secondBlock = secondIterator.next();
+				if (currBlock != secondBlock) {
+					if (currBlock.baseAddress + currBlock.length == secondBlock.baseAddress) {
+						currBlock.length += secondBlock.baseAddress;
+						freeList.remove(secondBlock);
+						secondIterator = freeList.iterator();
+					}
 				}
-			}
-			}
-		}
-			
-		}
 
-	
+			}
+		}
+	}
+
+}
