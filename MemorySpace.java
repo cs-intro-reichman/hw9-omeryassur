@@ -71,6 +71,7 @@ public class MemorySpace {
 	 */
 	public int malloc(int length) {
 		ListIterator iterator = freeList.iterator();
+		// System.out.println(iterator.hasNext());
 		while (iterator.hasNext()) {
 			if (iterator.current.block.length > length) {
 				MemoryBlock newBlock = new MemoryBlock(iterator.current.block.baseAddress, length);

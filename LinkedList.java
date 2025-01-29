@@ -61,6 +61,9 @@ public class LinkedList {
 		Node currNode = first;
 		for (int i = 0; i < index; i++) {
 			currNode = currNode.next;
+			if (currNode == null) {
+				return currNode;
+			}
 		}
 
 		return currNode;
@@ -88,24 +91,24 @@ public class LinkedList {
 	 */
 	public void add(int index, MemoryBlock block) {
 		if (index < 0 || index > size) {
-			throw new IllegalArgumentException(
-					"index must be between 0 and size");
+			throw new IllegalArgumentException("Index must be between 0 and size.");
 		}
 		Node newNode = new Node(block);
-		if (index == 0) {
+		if (size == 0) {
+			first = newNode;
+			last = newNode;
+		} else if (index == 0) {
 			newNode.next = first;
 			first = newNode;
 		} else if (index == size) {
 			last.next = newNode;
 			last = newNode;
 		} else {
-			Node current = first;
-			for (int i = 0; i < index; i++) {
-				current = current.next;
-			}
-			newNode.next = current.next;
-			current.next = newNode;
+			Node prevNode = getNode(index - 1);
+			prevNode.next = newNode.next;
+			prevNode.next = newNode;
 		}
+		size++;
 	}
 
 	/**
@@ -173,29 +176,26 @@ public class LinkedList {
 	 *             the node that will be removed from this list
 	 */
 	public void remove(Node node) {
-		Node current = first;
-		Node prev = null;
-		if (size == 0) {
-			return;
-		}
-
-		while (current != null) {
-			if (current == node) {
-				if (size == 1) {
-					first = null;
-					last = null;
-				} else if (current == last) {
-					last = prev;
-				} else if (current == first) {
-					first = current.next;
-				}
-
-				prev.next = current.next;
-				size--;
-				return;
+		if (first == node) {
+			first = first.next;
+			if (first == null) {
+				last = first;
 			}
-			prev = current;
-			current = current.next;
+			size--;
+		}
+		for (int i = 1; i < size; i++) {
+			Node currNode = getNode(i);
+			if (currNode == node) {
+				Node prevNode = getNode(i - 1);
+				if (currNode == last) {
+					last = prevNode;
+				}
+				prevNode.next = currNode.next;
+				currNode = null;
+				size--;
+				break;
+			}
+
 		}
 
 	}
